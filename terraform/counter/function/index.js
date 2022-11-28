@@ -19,7 +19,7 @@ exports.handler = async (event) => {
     const sourceIpAddress = event.requestContext.http.sourceIp;
 
     const updatedCounter = await count(counterName, sourceIpAddress, isIpCheck);
-    console.info(JSON.stringify(updatedCounter));
+    // console.info(JSON.stringify(updatedCounter));
 
     const updatedCount = updatedCounter.Current.N;
     const updatedCountText = (Array(digit).join('0') + updatedCount).slice(-digit);
