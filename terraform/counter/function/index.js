@@ -1,25 +1,40 @@
 var aws = require('aws-sdk');
 var dynamo = new aws.DynamoDB();
 
+// TODO 環境変数にするなど
 var tableName = "lambynamo-counter-table";
 
 exports.handler = async (event) => {
-    console.info(JSON.stringify(event))
+    console.info(JSON.stringify(event));
 
-    var counterName = event.queryStringParameters.name + "";
-    if(!counterName || counterName.length > 255) {
+    const counterName = event.queryStringParameters?.name;
+    if (!counterName || counterName.length > 255) {
         return {
             statusCode: 400,
             body: "invalid name. " + counterName,
         };
     }
-    var sourceIpAddress = event.requestContext.http.sourceIp;
+    const digit = event.queryStringParameters?.digit ?? 6;
+    const sourceIpAddress = event.requestContext.http.sourceIp;
 
-    var updatedCounter = await count(counterName, sourceIpAddress);
-    
+    const updatedCounter = await count(counterName, sourceIpAddress);
+    console.info(JSON.stringify(updatedCounter));
+
+    const updatedCount = updatedCounter.Attributes.Current.N;
+    const updatedCountText = (Array(digit).join('0') + updatedCount).slice(-digit);
+
     return {
         statusCode: 200,
-        body: JSON.stringify(updatedCounter),
+        headers: { "content-type": "image/svg+xml" },
+        body: `<svg
+    width="${updatedCountText.length * 8 + 2}" height="18" xmlns="http://www.w3.org/2000/svg" 
+    style="background: rgba(0, 0, 0, 0);">
+<text x="1" y="15">${updatedCountText}</text>
+<style>text {
+  font-size: 16px;
+  font-family: monospace;
+}</style>
+</svg>`,
     };
 };
 
