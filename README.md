@@ -1,6 +1,6 @@
 # lambdynamo-counter
 
-AWSのLambda関数のURLとDynamoDBで動作するカウンターです。
+AWSのLambda関数のURLとDynamoDBで動作するアクセスカウンターです。
 
 ## 表示の仕方
 
