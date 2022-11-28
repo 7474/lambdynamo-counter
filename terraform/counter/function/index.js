@@ -14,15 +14,17 @@ exports.handler = async (event) => {
             body: "invalid name. " + counterName,
         };
     }
-    const digit = event.queryStringParameters?.digit ?? 6;
+    const digit = (event.queryStringParameters?.digit ?? 6) * 1;
+    const isIpCheck = !!(event.queryStringParameters?.ip_check ?? false);
     const sourceIpAddress = event.requestContext.http.sourceIp;
 
-    const updatedCounter = await count(counterName, sourceIpAddress);
+    const updatedCounter = await count(counterName, sourceIpAddress, isIpCheck);
     console.info(JSON.stringify(updatedCounter));
 
-    const updatedCount = updatedCounter.Attributes.Current.N;
+    const updatedCount = updatedCounter.Current.N;
     const updatedCountText = (Array(digit).join('0') + updatedCount).slice(-digit);
 
+    // TODO デザインそれっぽくしたい
     return {
         statusCode: 200,
         headers: { "content-type": "image/svg+xml" },
@@ -38,7 +40,16 @@ exports.handler = async (event) => {
     };
 };
 
-function count(counterName, sourceIpAddress) {
+async function count(counterName, sourceIpAddress, isIpCheck) {
+    try {
+        return await update(counterName, sourceIpAddress, isIpCheck);
+    } catch {
+        // 更新失敗も含めて失敗全般はgetして返す
+        return await get(counterName);
+    }
+}
+
+function update(counterName, sourceIpAddress, isIpCheck) {
     return new Promise((resolve, reject) => {
         dynamo.updateItem({
             TableName: tableName,
@@ -51,15 +62,34 @@ function count(counterName, sourceIpAddress) {
                 "#v1": "LastIPAddress",
                 "#v2": "Current",
             },
+            ConditionExpression: "LastIPAddress <> :v3",
             ExpressionAttributeValues: {
                 ":v1": { S: sourceIpAddress },
                 ":v2": { N: "1" },
+                ":v3": { S: isIpCheck ? sourceIpAddress : "-" },
             }
         }, function (err, data) {
             if (err) {
-                reject(err, err);
+                reject(err);
             } else {
-                resolve(data);
+                resolve(data.Attributes);
+            }
+        });
+    });
+}
+
+function get(counterName) {
+    return new Promise((resolve, reject) => {
+        dynamo.getItem({
+            TableName: tableName,
+            Key: {
+                CounterName: { S: counterName },
+            },
+        }, function (err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data.Item);
             }
         });
     });
