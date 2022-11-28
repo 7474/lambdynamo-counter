@@ -8,7 +8,7 @@ variable "secret_key" {
 }
 
 variable "name_prefix" {
-  default = "lambynamo-counter"
+  default = "lambdynamo-counter"
 }
 
 variable "cors_allow_origins" {

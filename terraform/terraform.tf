@@ -2,7 +2,7 @@ terraform {
   backend "remote" {
     organization = "koudenpa"
     workspaces {
-      name = "lambynamo-counter"
+      name = "lambdynamo-counter"
     }
   }
 }

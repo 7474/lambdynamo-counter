@@ -65,6 +65,7 @@ resource "aws_iam_policy" "counter_for_access_dynamodb" {
 data "aws_iam_policy_document" "counter_for_access_dynamodb" {
   statement {
     actions = [
+      "dynamodb:GetItem",
       "dynamodb:UpdateItem",
     ]
 
