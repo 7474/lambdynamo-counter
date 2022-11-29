@@ -8,6 +8,12 @@ resource "aws_lambda_function" "counter" {
   role    = aws_iam_role.counter.arn
   handler = "index.handler"
   runtime = "nodejs16.x"
+
+  environment {
+    variables = {
+      COUNTER_TABLE_NAME = aws_dynamodb_table.counter.name
+    }
+  }
 }
 
 data "archive_file" "counter" {

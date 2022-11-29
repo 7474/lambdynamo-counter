@@ -1,8 +1,7 @@
 var aws = require('aws-sdk');
 var dynamo = new aws.DynamoDB();
 
-// TODO 環境変数にするなど
-var tableName = "lambdynamo-counter-table";
+var tableName = process.env["COUNTER_TABLE_NAME"];
 
 exports.handler = async (event) => {
     console.info(JSON.stringify(event));
