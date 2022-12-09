@@ -33,7 +33,7 @@ resource "aws_lambda_function_url" "counter" {
 }
 
 resource "aws_iam_role" "counter" {
-  name = aws_lambda_function.counter.function_name
+  name = "${var.name_prefix}-function"
 
   assume_role_policy = <<EOF
 {
